@@ -1,3 +1,4 @@
-MODEL = "gpt-4.1"
+INFERENCE_MODEL = "gpt-4.1-mini"
+EMBEDDING_MODEL = "text-embedding-3-small"
 TEMPERATURE = 0.2
 MAX_MESSAGES = 10

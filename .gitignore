@@ -208,3 +208,5 @@ __marimo__/
 
 # personal info data
 data/
+
+./chroma_db
