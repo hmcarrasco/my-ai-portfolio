@@ -1,6 +1,6 @@
 from openai import OpenAI
-from api.utils.loaders import load_yaml
-from api.utils.logger import get_logger
+from ai.utils.loaders import load_yaml
+from ai.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -9,10 +9,10 @@ class OpenaiClient:
     def __init__(
         self,
         openai_api_key: str,
-        prompts_path: str = "api/prompts.yaml",
+        prompts_path: str = "ai/prompts.yaml",
         model: str = "gpt-4.1-mini",
         temperature: float = 0.2,
-        max_messages: int = 10,
+        max_messages: int = 6,
     ):
         self.client = OpenAI(api_key=openai_api_key)
         self.model = model

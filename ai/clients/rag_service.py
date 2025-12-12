@@ -1,6 +1,6 @@
-from chromadb import Client as ChromaClient
-from api.clients.openai_client import OpenaiClient
-from api.utils.logger import get_logger
+from chromadb import PersistentClient
+from ai.clients.openai_client import OpenaiClient
+from ai.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -9,10 +9,10 @@ class RAGService:
     def __init__(
         self,
         openai_client: OpenaiClient,
-        chroma_collection: str = "rag_docs",
+        chroma_collection: str = "docs",
         persist_path: str = "./chroma_db",
     ):
-        self.chroma = ChromaClient(persist_directory=persist_path)
+        self.chroma = PersistentClient(path=persist_path)
         self.collection = self.chroma.get_or_create_collection(chroma_collection)
         self.openai_client = openai_client
 
@@ -26,7 +26,9 @@ class RAGService:
             metadata (dict, optional): Additional metadata for the document.
         """
         self.collection.add(
-            documents=[content], ids=[doc_id], metadatas=[metadata or {}]
+            documents=[content],
+            ids=[doc_id],
+            metadatas=[metadata if metadata and len(metadata) > 0 else {"source": "ingest"}]
         )
         logger.info("Document added to ChromaDB: %s", doc_id)
 
