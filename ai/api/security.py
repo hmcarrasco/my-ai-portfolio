@@ -22,7 +22,7 @@ def verify_api_key(x_api_key: str = Header(...)) -> str:
     if not CHATBOT_API_KEY:
         logger.error("CHATBOT_API_KEY is not configured")
         raise HTTPException(status_code=500, detail="API Key not configured")
-    
+
     if x_api_key != CHATBOT_API_KEY:
         logger.warning("Invalid API key attempt detected")
         raise HTTPException(status_code=401, detail="Invalid API Key")

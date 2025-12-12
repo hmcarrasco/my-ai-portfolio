@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from ai.api.schemas.health import HealthResponse
-from ai.api.security import verify_api_key
 from ai.utils.logger import get_logger
 
 logger = get_logger(__name__)

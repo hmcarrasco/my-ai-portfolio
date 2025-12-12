@@ -19,7 +19,9 @@ def get_chat_service() -> ChatService:
     return ChatService.get_instance()
 
 
-@router.post("/ask", response_model=AnswerResponse, dependencies=[Depends(verify_api_key)])
+@router.post(
+    "/ask", response_model=AnswerResponse, dependencies=[Depends(verify_api_key)]
+)
 def ask_question(
     req: QuestionRequest,
     chat_service: ChatService = Depends(get_chat_service),

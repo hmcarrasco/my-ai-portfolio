@@ -11,7 +11,7 @@ class TestTextChunker:
         chunker = TextChunker(chunk_size=10, overlap=2)
         text = "Hello World Test"
         chunks = chunker.chunk_text(text)
-        
+
         assert len(chunks) > 0
         assert all(isinstance(chunk, str) for chunk in chunks)
         assert all(len(chunk) <= 10 for chunk in chunks)
@@ -20,9 +20,9 @@ class TestTextChunker:
         """Test basic text chunking."""
         chunker = TextChunker(chunk_size=10, overlap=2)
         text = "This is a test text for chunking"
-        
+
         chunks = chunker.chunk_text(text)
-        
+
         assert len(chunks) > 0
         assert all(len(chunk) <= 10 for chunk in chunks)
 
@@ -30,9 +30,9 @@ class TestTextChunker:
         """Test that chunks have proper overlap."""
         chunker = TextChunker(chunk_size=10, overlap=3)
         text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        
+
         chunks = chunker.chunk_text(text)
-        
+
         # Verify overlap exists between consecutive chunks
         for i in range(len(chunks) - 1):
             # Last few chars of chunk[i] should appear in chunk[i+1]
@@ -42,9 +42,9 @@ class TestTextChunker:
         """Test chunking empty text."""
         chunker = TextChunker(chunk_size=10, overlap=2)
         text = ""
-        
+
         chunks = chunker.chunk_text(text)
-        
+
         # Empty text returns empty list (no chunks)
         assert chunks == []
 
@@ -52,21 +52,24 @@ class TestTextChunker:
         """Test chunking text smaller than chunk size."""
         chunker = TextChunker(chunk_size=100, overlap=10)
         text = "Short text"
-        
+
         chunks = chunker.chunk_text(text)
-        
+
         assert len(chunks) == 1
         assert chunks[0] == text
 
-    @pytest.mark.parametrize("chunk_size,overlap", [
-        (256, 20),
-        (512, 50),
-        (100, 10),
-    ])
+    @pytest.mark.parametrize(
+        "chunk_size,overlap",
+        [
+            (256, 20),
+            (512, 50),
+            (100, 10),
+        ],
+    )
     def test_chunk_initialization(self, chunk_size, overlap):
         """Test TextChunker initialization with different parameters."""
         chunker = TextChunker(chunk_size=chunk_size, overlap=overlap)
-        
+
         assert chunker.chunk_size == chunk_size
         assert chunker.overlap == overlap
 
@@ -76,9 +79,9 @@ class TestTextChunker:
         test_file = tmp_path / "test.txt"
         test_content = "This is test content for file chunking. " * 10
         test_file.write_text(test_content)
-        
+
         chunker = TextChunker(chunk_size=50, overlap=10)
         chunks = chunker.chunk_file(str(test_file))
-        
+
         assert len(chunks) > 0
         assert all(isinstance(chunk, str) for chunk in chunks)

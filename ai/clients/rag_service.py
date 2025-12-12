@@ -28,7 +28,9 @@ class RAGService:
         self.collection.add(
             documents=[content],
             ids=[doc_id],
-            metadatas=[metadata if metadata and len(metadata) > 0 else {"source": "ingest"}]
+            metadatas=[
+                metadata if metadata and len(metadata) > 0 else {"source": "ingest"}
+            ],
         )
         logger.info("Document added to ChromaDB: %s", doc_id)
 

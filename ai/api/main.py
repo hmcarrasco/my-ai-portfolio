@@ -10,13 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 logger = get_logger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Validate required environment variables
     if not OPENAI_API_KEY:
         logger.error("OPENAI_API_KEY is not configured")
         raise RuntimeError("OPENAI_API_KEY environment variable is required")
-    
+
     if not CHATBOT_API_KEY:
         logger.error("CHATBOT_API_KEY is not configured")
         raise RuntimeError("CHATBOT_API_KEY environment variable is required")
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
     logger.info("RAG manager initialized and data loaded")
     yield
     logger.info("Application shutting down")
+
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -47,5 +49,6 @@ def create_app() -> FastAPI:
 
     logger.info("FastAPI application created successfully")
     return app
+
 
 app = create_app()

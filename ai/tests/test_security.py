@@ -17,7 +17,7 @@ class TestSecurity:
         monkeypatch.setattr(security_module, "CHATBOT_API_KEY", "test-chatbot-key")
         with pytest.raises(HTTPException) as exc_info:
             security_module.verify_api_key("wrong-key")
-        
+
         assert exc_info.value.status_code == 401
         assert "Invalid API Key" in exc_info.value.detail
 
@@ -26,15 +26,18 @@ class TestSecurity:
         monkeypatch.setattr(security_module, "CHATBOT_API_KEY", None)
         with pytest.raises(HTTPException) as exc_info:
             security_module.verify_api_key("any-key")
-        
+
         assert exc_info.value.status_code == 500
         assert "not configured" in exc_info.value.detail
 
-    @pytest.mark.parametrize("api_key", [
-        "sk-test-key-123",
-        "very-long-api-key-with-special-chars-!@#$%",
-        "short",
-    ])
+    @pytest.mark.parametrize(
+        "api_key",
+        [
+            "sk-test-key-123",
+            "very-long-api-key-with-special-chars-!@#$%",
+            "short",
+        ],
+    )
     def test_verify_api_key_various_formats(self, api_key, monkeypatch):
         """Test API key verification with various key formats."""
         monkeypatch.setattr(security_module, "CHATBOT_API_KEY", api_key)

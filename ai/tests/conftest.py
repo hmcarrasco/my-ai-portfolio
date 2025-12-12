@@ -6,11 +6,14 @@ from unittest.mock import patch, MagicMock
 @pytest.fixture
 def mock_env_vars():
     """Mock environment variables for testing."""
-    with patch.dict(os.environ, {
-        "OPENAI_API_KEY": "test-openai-key",
-        "CHATBOT_API_KEY": "test-chatbot-key",
-        "ALLOWED_ORIGINS": "http://localhost:3000",
-    }):
+    with patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test-openai-key",
+            "CHATBOT_API_KEY": "test-chatbot-key",
+            "ALLOWED_ORIGINS": "http://localhost:3000",
+        },
+    ):
         yield
 
 
