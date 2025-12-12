@@ -1,0 +1,67 @@
+from chromadb import PersistentClient
+from ai.clients.openai_client import OpenaiClient
+from ai.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class RAGService:
+    def __init__(
+        self,
+        openai_client: OpenaiClient,
+        chroma_collection: str = "docs",
+        persist_path: str = "./chroma_db",
+    ):
+        self.chroma = PersistentClient(path=persist_path)
+        self.collection = self.chroma.get_or_create_collection(chroma_collection)
+        self.openai_client = openai_client
+
+    def add_document(self, doc_id: str, content: str, metadata: dict = None):
+        """
+        Add a document to the ChromaDB collection.
+
+        Args:
+            doc_id (str): Unique document identifier.
+            content (str): Document text/content.
+            metadata (dict, optional): Additional metadata for the document.
+        """
+        self.collection.add(
+            documents=[content],
+            ids=[doc_id],
+            metadatas=[
+                metadata if metadata and len(metadata) > 0 else {"source": "ingest"}
+            ],
+        )
+        logger.info("Document added to ChromaDB: %s", doc_id)
+
+    def retrieve(self, query: str, n_results: int = 3):
+        """
+        Retrieve top-n relevant documents from ChromaDB.
+
+        Args:
+            query (str): Query text for retrieval.
+            n_results (int): Number of documents to retrieve.
+
+        Returns:
+            list: List of retrieved document contents.
+        """
+        results = self.collection.query(query_texts=[query], n_results=n_results)
+        docs = [doc for doc in results["documents"][0]]
+        logger.info("Retrieved %d docs from ChromaDB for query: %s", len(docs), query)
+        return docs
+
+    def answer_with_rag(self, user_query: str) -> str:
+        """
+        Retrieve relevant documents and generate an answer using OpenaiClient.
+
+        Args:
+            user_query (str): The user's question.
+
+        Returns:
+            str: The generated answer from the LLM.
+        """
+        docs = self.retrieve(user_query)
+        context = "\n".join(docs)
+        prompt = f"Context:\n{context}\n\nQuestion: {user_query}\nAnswer:"
+        logger.info("Sending RAG prompt to OpenAI.")
+        return self.openai_client.generate_response_with_memory(prompt)
