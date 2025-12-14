@@ -1,3 +1,4 @@
+import threading
 from typing import Optional
 from fastapi import HTTPException
 
@@ -25,10 +26,13 @@ class RAGManager:
 
     _instance: Optional["RAGManager"] = None
     _rag_service: Optional[RAGService] = None
+    _lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
         return cls._instance
 
     @classmethod
@@ -67,22 +71,26 @@ class RAGManager:
         """
         Private method to initialize RAG service and ingest data if needed.
         """
-        logger.info("Initializing OpenAI client...")
-        openai_client = OpenaiClient(openai_api_key=OPENAI_API_KEY)
+        with self._lock:
+            if self._rag_service is not None:
+                return
 
-        logger.info("Initializing RAG service...")
-        self._rag_service = RAGService(
-            openai_client=openai_client,
-            chroma_collection=CHROMA_COLLECTION,
-            persist_path=CHROMA_PERSIST_PATH,
-        )
+            logger.info("Initializing OpenAI client...")
+            openai_client = OpenaiClient(openai_api_key=OPENAI_API_KEY)
 
-        # Ingest data if collection is empty
-        doc_count = self._rag_service.collection.count()
-        if doc_count == 0:
-            self._ingest_data()
-        else:
-            logger.info("RAG service loaded with %d documents", doc_count)
+            logger.info("Initializing RAG service...")
+            self._rag_service = RAGService(
+                openai_client=openai_client,
+                chroma_collection=CHROMA_COLLECTION,
+                persist_path=CHROMA_PERSIST_PATH,
+            )
+
+            # Ingest data if collection is empty
+            doc_count = self._rag_service.collection.count()
+            if doc_count == 0:
+                self._ingest_data()
+            else:
+                logger.info("RAG service loaded with %d documents", doc_count)
 
     def _ingest_data(self) -> None:
         """

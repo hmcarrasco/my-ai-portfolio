@@ -5,6 +5,21 @@ from ai.clients.chunker import TextChunker
 class TestTextChunker:
     """Test suite for TextChunker class."""
 
+    @pytest.mark.parametrize(
+        "chunk_size,overlap",
+        [
+            (0, 0),
+            (-1, 0),
+            (10, -1),
+            (10, 10),
+            (10, 11),
+        ],
+    )
+    def test_invalid_parameters_raise(self, chunk_size, overlap):
+        """Invalid chunk_size/overlap combinations should raise ValueError."""
+        with pytest.raises(ValueError):
+            TextChunker(chunk_size=chunk_size, overlap=overlap)
+
     def test_chunk_text_with_parameters(self):
         """Test chunking with different parameters."""
         # Test with overlap

@@ -31,7 +31,6 @@ def ask_question(
 
     Args:
         req (QuestionRequest): The user's question.
-        api_key (str): Verified API key (auto-injected).
         chat_service (ChatService): Chat service instance (auto-injected).
 
     Returns:
@@ -47,4 +46,7 @@ def ask_question(
         return AnswerResponse(question=req.question, answer=answer)
     except Exception as e:
         logger.error("Error generating answer: %s", e, exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to generate answer.")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate answer: {type(e).__name__}.",
+        )

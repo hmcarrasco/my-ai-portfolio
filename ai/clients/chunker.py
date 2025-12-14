@@ -3,6 +3,10 @@ from typing import List
 
 class TextChunker:
     def __init__(self, chunk_size: int = 256, overlap: int = 20):
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be greater than 0")
+        if overlap < 0 or overlap >= chunk_size:
+            raise ValueError("overlap must be >= 0 and < chunk_size")
         self.chunk_size = chunk_size
         self.overlap = overlap
 

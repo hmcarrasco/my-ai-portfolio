@@ -39,26 +39,25 @@ class OpenaiClient:
         if not self.memory:
             self.memory.append({"role": "system", "content": self.system_prompt})
 
+        # Check if adding user message would exceed limit
+        if len(self.memory) + 1 > self.max_messages:
+            # Summarize before adding new message
+            self.summary = self._summarize_memory(self.memory)
+
+            # Reset memory to condensed version
+            self.memory = [
+                {
+                    "role": "system",
+                    "content": f"{self.system_prompt}\nConversation summary: {self.summary}",
+                }
+            ]
+
         self.memory.append({"role": "user", "content": user_prompt})
 
         try:
-            if len(self.memory) > self.max_messages:
-                self.summary = self._summarize_memory(self.memory[:-1])
-
-                # Prepare memory for API: system prompt + summary + latest user message
-                memory_for_api = [
-                    {
-                        "role": "system",
-                        "content": f"{self.system_prompt}\nConversation summary: {self.summary}",
-                    },
-                    {"role": "user", "content": user_prompt},
-                ]
-            else:
-                # Use full memory if under max_messages
-                memory_for_api = self.memory.copy()
-
-            assistant_response = self._call_api(memory_for_api)
+            assistant_response = self._call_api(self.memory)
             self.memory.append({"role": "assistant", "content": assistant_response})
+
             logger.info(
                 "Response generated successfully for user prompt: '%s'", user_prompt
             )

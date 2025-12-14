@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 from chromadb import PersistentClient
 from ai.clients.openai_client import OpenaiClient
 from ai.utils.logger import get_logger
@@ -16,7 +18,12 @@ class RAGService:
         self.collection = self.chroma.get_or_create_collection(chroma_collection)
         self.openai_client = openai_client
 
-    def add_document(self, doc_id: str, content: str, metadata: dict = None):
+    def add_document(
+        self,
+        doc_id: str,
+        content: str,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> None:
         """
         Add a document to the ChromaDB collection.
 
@@ -25,16 +32,11 @@ class RAGService:
             content (str): Document text/content.
             metadata (dict, optional): Additional metadata for the document.
         """
-        self.collection.add(
-            documents=[content],
-            ids=[doc_id],
-            metadatas=[
-                metadata if metadata and len(metadata) > 0 else {"source": "ingest"}
-            ],
-        )
+        metadatas: dict[str, Any] = metadata if metadata else {"source": "ingest"}
+        self.collection.add(documents=[content], ids=[doc_id], metadatas=[metadatas])
         logger.info("Document added to ChromaDB: %s", doc_id)
 
-    def retrieve(self, query: str, n_results: int = 3):
+    def retrieve(self, query: str, n_results: int = 3) -> list[str]:
         """
         Retrieve top-n relevant documents from ChromaDB.
 
