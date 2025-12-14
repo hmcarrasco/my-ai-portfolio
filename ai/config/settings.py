@@ -3,7 +3,7 @@ from typing import List
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv("ai/config/.env")
+load_dotenv("ai/config/.env") or load_dotenv()
 
 # API Configuration
 CHATBOT_API_KEY = os.getenv("CHATBOT_API_KEY")

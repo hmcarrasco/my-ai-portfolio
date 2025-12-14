@@ -92,3 +92,45 @@ class TestOpenaiClient:
         response = openai_client.generate_response_with_memory("Test message")
 
         assert response == "[Error generating response]"
+
+    def test_memory_is_condensed_after_summarization(self, openai_client, mock_openai):
+        """When summarization triggers, memory should not grow unbounded."""
+        openai_client.max_messages = 4
+        
+        # Fill memory to just under the limit
+        openai_client.memory = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "msg1"},
+            {"role": "assistant", "content": "resp1"},
+        ]
+
+        mock_answer1 = MagicMock()
+        mock_answer1.choices[0].message.content = "answer1"
+        mock_openai.chat.completions.create.return_value = mock_answer1
+
+        # This adds user + assistant, making memory = 5 items
+        out1 = openai_client.generate_response_with_memory("msg2")
+        assert out1 == "answer1"
+        assert len(openai_client.memory) == 5
+
+        # Next message would make it 6 (5 + 1), which exceeds limit of 4
+        # Should trigger summarization BEFORE adding user message
+        mock_summary = MagicMock()
+        mock_summary.choices[0].message.content = "User asked questions"
+
+        mock_answer2 = MagicMock()
+        mock_answer2.choices[0].message.content = "answer2"
+
+        mock_openai.chat.completions.create.side_effect = [mock_summary, mock_answer2]
+
+        out2 = openai_client.generate_response_with_memory("msg3")
+        assert out2 == "answer2"
+
+        # Memory should be condensed to 3 items
+        assert len(openai_client.memory) == 3
+        assert openai_client.memory[0]["role"] == "system"
+        assert "Conversation summary:" in openai_client.memory[0]["content"]
+        assert openai_client.memory[1]["role"] == "user"
+        assert openai_client.memory[1]["content"] == "msg3"
+        assert openai_client.memory[2]["role"] == "assistant"
+        assert openai_client.memory[2]["content"] == "answer2"
