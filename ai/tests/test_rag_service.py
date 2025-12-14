@@ -26,9 +26,15 @@ def mock_openai_client():
     return client
 
 
-def test_add_document_defaults_metadata_when_none(mock_openai_client, mock_chroma_client, mock_chroma_collection):
-    with patch("ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client):
-        service = RAGService(openai_client=mock_openai_client, persist_path="/tmp/chroma")
+def test_add_document_defaults_metadata_when_none(
+    mock_openai_client, mock_chroma_client, mock_chroma_collection
+):
+    with patch(
+        "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
+    ):
+        service = RAGService(
+            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+        )
         service.add_document("doc1", "hello", metadata=None)
 
     mock_chroma_collection.add.assert_called_once()
@@ -36,30 +42,48 @@ def test_add_document_defaults_metadata_when_none(mock_openai_client, mock_chrom
     assert kwargs["metadatas"] == [{"source": "ingest"}]
 
 
-def test_add_document_uses_metadata_when_provided(mock_openai_client, mock_chroma_client, mock_chroma_collection):
-    with patch("ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client):
-        service = RAGService(openai_client=mock_openai_client, persist_path="/tmp/chroma")
+def test_add_document_uses_metadata_when_provided(
+    mock_openai_client, mock_chroma_client, mock_chroma_collection
+):
+    with patch(
+        "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
+    ):
+        service = RAGService(
+            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+        )
         service.add_document("doc1", "hello", metadata={"source": "unit"})
 
     _, kwargs = mock_chroma_collection.add.call_args
     assert kwargs["metadatas"] == [{"source": "unit"}]
 
 
-def test_retrieve_returns_documents(mock_openai_client, mock_chroma_client, mock_chroma_collection):
+def test_retrieve_returns_documents(
+    mock_openai_client, mock_chroma_client, mock_chroma_collection
+):
     mock_chroma_collection.query.return_value = {"documents": [["a", "b"]]}
 
-    with patch("ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client):
-        service = RAGService(openai_client=mock_openai_client, persist_path="/tmp/chroma")
+    with patch(
+        "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
+    ):
+        service = RAGService(
+            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+        )
         docs = service.retrieve("q", n_results=2)
 
     assert docs == ["a", "b"]
 
 
-def test_answer_with_rag_builds_prompt_and_calls_openai(mock_openai_client, mock_chroma_client, mock_chroma_collection):
+def test_answer_with_rag_builds_prompt_and_calls_openai(
+    mock_openai_client, mock_chroma_client, mock_chroma_collection
+):
     mock_chroma_collection.query.return_value = {"documents": [["ctx1", "ctx2"]]}
 
-    with patch("ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client):
-        service = RAGService(openai_client=mock_openai_client, persist_path="/tmp/chroma")
+    with patch(
+        "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
+    ):
+        service = RAGService(
+            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+        )
         out = service.answer_with_rag("my question")
 
     assert out == "mock-answer"

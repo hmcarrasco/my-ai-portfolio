@@ -43,7 +43,7 @@ class OpenaiClient:
         if len(self.memory) + 1 > self.max_messages:
             # Summarize before adding new message
             self.summary = self._summarize_memory(self.memory)
-            
+
             # Reset memory to condensed version
             self.memory = [
                 {
@@ -57,7 +57,7 @@ class OpenaiClient:
         try:
             assistant_response = self._call_api(self.memory)
             self.memory.append({"role": "assistant", "content": assistant_response})
-            
+
             logger.info(
                 "Response generated successfully for user prompt: '%s'", user_prompt
             )

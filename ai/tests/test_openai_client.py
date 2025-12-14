@@ -96,7 +96,7 @@ class TestOpenaiClient:
     def test_memory_is_condensed_after_summarization(self, openai_client, mock_openai):
         """When summarization triggers, memory should not grow unbounded."""
         openai_client.max_messages = 4
-        
+
         # Fill memory to just under the limit
         openai_client.memory = [
             {"role": "system", "content": "You are a helpful assistant."},
