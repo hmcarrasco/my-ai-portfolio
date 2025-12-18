@@ -8,13 +8,13 @@ class TestSecurity:
 
     def test_verify_api_key_valid(self, monkeypatch):
         """Test API key verification with valid key."""
-        monkeypatch.setattr(security_module, "CHATBOT_API_KEY", "test-chatbot-key")
+        monkeypatch.setattr(security_module.settings, "chatbot_api_key", "test-chatbot-key")
         result = security_module.verify_api_key("test-chatbot-key")
         assert result == "test-chatbot-key"
 
     def test_verify_api_key_invalid(self, monkeypatch):
         """Test API key verification with invalid key."""
-        monkeypatch.setattr(security_module, "CHATBOT_API_KEY", "test-chatbot-key")
+        monkeypatch.setattr(security_module.settings, "chatbot_api_key", "test-chatbot-key")
         with pytest.raises(HTTPException) as exc_info:
             security_module.verify_api_key("wrong-key")
 
@@ -23,7 +23,7 @@ class TestSecurity:
 
     def test_verify_api_key_not_configured(self, monkeypatch):
         """Test API key verification when key is not configured."""
-        monkeypatch.setattr(security_module, "CHATBOT_API_KEY", None)
+        monkeypatch.setattr(security_module.settings, "chatbot_api_key", None)
         with pytest.raises(HTTPException) as exc_info:
             security_module.verify_api_key("any-key")
 
@@ -40,6 +40,6 @@ class TestSecurity:
     )
     def test_verify_api_key_various_formats(self, api_key, monkeypatch):
         """Test API key verification with various key formats."""
-        monkeypatch.setattr(security_module, "CHATBOT_API_KEY", api_key)
+        monkeypatch.setattr(security_module.settings, "chatbot_api_key", api_key)
         result = security_module.verify_api_key(api_key)
         assert result == api_key
