@@ -32,7 +32,7 @@ DOCS_CACHE_DIR = "ai/data/docs_cache"
 DOCS_CACHE_MAX_AGE_DAYS = 30
 
 # Prompts Configuration
-CHATBOT_PROMPTS_PATH = "ai/prompts/chatbot.yaml"
+CHATBOT_PROMPTS_PATH = "ai/prompts/chatbot_prompts.yaml"
 DOC_GENERATOR_PROMPTS_PATH = "ai/prompts/doc_generator.yaml"
 
 
