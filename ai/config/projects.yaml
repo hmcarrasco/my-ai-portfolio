@@ -1,6 +1,6 @@
 projects:
   - name: my-ai-portfolio
-    repo: hmcarrasco/my-ai-portfolio
+    repo: my-ai-portfolio
     description: "RAG-powered chatbot and document generation portfolio showcasing AI engineering skills"
     doc_types:
       - overview

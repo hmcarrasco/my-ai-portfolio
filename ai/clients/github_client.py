@@ -126,41 +126,6 @@ class GitHubClient:
             logger.error("Request error fetching file %s/%s: %s", repo, file_path, e)
             raise
 
-    def get_repo_info(self, repo: str) -> dict[str, Any]:
-        """
-        Fetch repository metadata.
-
-        Args:
-            repo: Repository in format 'owner/repo'.
-
-        Returns:
-            Dictionary with repo info (name, description, language, topics, etc.).
-        """
-        url = f"{self.base_url}/repos/{repo}"
-        try:
-            response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
-
-            data = response.json()
-            return {
-                "name": data.get("name"),
-                "full_name": data.get("full_name"),
-                "description": data.get("description"),
-                "language": data.get("language"),
-                "topics": data.get("topics", []),
-                "default_branch": data.get("default_branch"),
-                "html_url": data.get("html_url"),
-                "created_at": data.get("created_at"),
-                "updated_at": data.get("updated_at"),
-            }
-
-        except requests.exceptions.HTTPError as e:
-            logger.error("HTTP error fetching repo info for %s: %s", repo, e)
-            raise
-        except requests.exceptions.RequestException as e:
-            logger.error("Request error fetching repo info for %s: %s", repo, e)
-            raise
-
     def get_languages(self, repo: str) -> dict[str, int]:
         """
         Fetch languages used in repository.

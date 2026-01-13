@@ -86,8 +86,10 @@ class RAGManager:
             logger.info("Initializing RAG service...")
             self._rag_service = RAGService(
                 openai_client=openai_client,
+                openai_api_key=settings.openai_api_key,
                 chroma_collection=settings.chroma_collection,
                 persist_path=settings.chroma_persist_path,
+                embedding_model=settings.openai_embedding_model,
             )
 
             # Ingest data if collection is empty

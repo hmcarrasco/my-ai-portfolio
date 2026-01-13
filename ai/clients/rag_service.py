@@ -1,6 +1,8 @@
 from typing import Any, Optional
 
 from chromadb import PersistentClient
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+
 from ai.clients.openai_client import OpenaiClient
 from ai.utils.logger import get_logger
 
@@ -11,11 +13,24 @@ class RAGService:
     def __init__(
         self,
         openai_client: OpenaiClient,
+        openai_api_key: str,
         chroma_collection: str = "docs",
         persist_path: str = "./chroma_db",
+        embedding_model: str = "text-embedding-3-small",
     ):
         self.chroma = PersistentClient(path=persist_path)
-        self.collection = self.chroma.get_or_create_collection(chroma_collection)
+
+        # Use OpenAI embeddings for semantic search
+        self.embedding_function = OpenAIEmbeddingFunction(
+            api_key=openai_api_key,
+            model_name=embedding_model,
+        )
+        logger.info("Using OpenAI embedding model: %s", embedding_model)
+
+        self.collection = self.chroma.get_or_create_collection(
+            name=chroma_collection,
+            embedding_function=self.embedding_function,
+        )
         self.openai_client = openai_client
 
     def add_document(

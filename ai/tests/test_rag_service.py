@@ -26,14 +26,28 @@ def mock_openai_client():
     return client
 
 
+@pytest.fixture
+def mock_embedding_function():
+    """Mock OpenAI embedding function."""
+    with patch("ai.clients.rag_service.OpenAIEmbeddingFunction") as mock:
+        mock_instance = MagicMock()
+        mock.return_value = mock_instance
+        yield mock_instance
+
+
 def test_add_document_defaults_metadata_when_none(
-    mock_openai_client, mock_chroma_client, mock_chroma_collection
+    mock_openai_client,
+    mock_chroma_client,
+    mock_chroma_collection,
+    mock_embedding_function,
 ):
     with patch(
         "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
     ):
         service = RAGService(
-            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+            openai_client=mock_openai_client,
+            openai_api_key="test-key",
+            persist_path="/tmp/chroma",
         )
         service.add_document("doc1", "hello", metadata=None)
 
@@ -43,13 +57,18 @@ def test_add_document_defaults_metadata_when_none(
 
 
 def test_add_document_uses_metadata_when_provided(
-    mock_openai_client, mock_chroma_client, mock_chroma_collection
+    mock_openai_client,
+    mock_chroma_client,
+    mock_chroma_collection,
+    mock_embedding_function,
 ):
     with patch(
         "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
     ):
         service = RAGService(
-            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+            openai_client=mock_openai_client,
+            openai_api_key="test-key",
+            persist_path="/tmp/chroma",
         )
         service.add_document("doc1", "hello", metadata={"source": "unit"})
 
@@ -58,7 +77,10 @@ def test_add_document_uses_metadata_when_provided(
 
 
 def test_retrieve_returns_documents(
-    mock_openai_client, mock_chroma_client, mock_chroma_collection
+    mock_openai_client,
+    mock_chroma_client,
+    mock_chroma_collection,
+    mock_embedding_function,
 ):
     mock_chroma_collection.query.return_value = {"documents": [["a", "b"]]}
 
@@ -66,7 +88,9 @@ def test_retrieve_returns_documents(
         "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
     ):
         service = RAGService(
-            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+            openai_client=mock_openai_client,
+            openai_api_key="test-key",
+            persist_path="/tmp/chroma",
         )
         docs = service.retrieve("q", n_results=2)
 
@@ -74,7 +98,10 @@ def test_retrieve_returns_documents(
 
 
 def test_answer_with_rag_builds_prompt_and_calls_openai(
-    mock_openai_client, mock_chroma_client, mock_chroma_collection
+    mock_openai_client,
+    mock_chroma_client,
+    mock_chroma_collection,
+    mock_embedding_function,
 ):
     mock_chroma_collection.query.return_value = {"documents": [["ctx1", "ctx2"]]}
 
@@ -82,7 +109,9 @@ def test_answer_with_rag_builds_prompt_and_calls_openai(
         "ai.clients.rag_service.PersistentClient", return_value=mock_chroma_client
     ):
         service = RAGService(
-            openai_client=mock_openai_client, persist_path="/tmp/chroma"
+            openai_client=mock_openai_client,
+            openai_api_key="test-key",
+            persist_path="/tmp/chroma",
         )
         out = service.answer_with_rag("my question")
 
