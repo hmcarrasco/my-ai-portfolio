@@ -22,7 +22,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     """Custom handler for rate limit exceeded errors."""
-    logger.warning("Rate limit exceeded for %s on %s", request.client.host, request.url.path)
+    logger.warning(
+        "Rate limit exceeded for %s on %s", request.client.host, request.url.path
+    )
     return JSONResponse(
         status_code=429,
         content={"detail": f"Rate limit exceeded: {exc.detail}"},
