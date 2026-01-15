@@ -1,5 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from ai.config.settings import settings
 from ai.api.routers.chat import router as chat_router
@@ -10,6 +15,18 @@ from ai.utils.logger import get_logger
 from fastapi.middleware.cors import CORSMiddleware
 
 logger = get_logger(__name__)
+
+# Rate limiter instance - uses IP address as identifier
+limiter = Limiter(key_func=get_remote_address)
+
+
+def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler for rate limit exceeded errors."""
+    logger.warning("Rate limit exceeded for %s on %s", request.client.host, request.url.path)
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded: {exc.detail}"},
+    )
 
 
 @asynccontextmanager
@@ -36,6 +53,10 @@ def create_app() -> FastAPI:
         version="1.0.0",
         lifespan=lifespan,
     )
+
+    # Add rate limiter to app state and register error handler
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
     app.add_middleware(
         CORSMiddleware,

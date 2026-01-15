@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
+from ai.api.main import limiter
 from ai.api.schemas.docs import (
     GenerateDocsRequest,
     GenerateDocsResponse,
@@ -76,7 +77,9 @@ def list_doc_types() -> DocTypesResponse:
     dependencies=[Depends(verify_api_key)],
     summary="Generate documentation for a repository",
 )
+@limiter.limit("3/day")
 def generate_documentation(
+    request: Request,
     req: GenerateDocsRequest,
     doc_generator: DocGenerator = Depends(get_doc_generator),
 ) -> GenerateDocsResponse:
@@ -93,7 +96,6 @@ def generate_documentation(
     Raises:
         HTTPException: If repo not found or documentation generation fails.
     """
-    # Find project in projects.yaml
     projects = get_projects()
     project = next((p for p in projects if p["repo"] == req.repo), None)
 
