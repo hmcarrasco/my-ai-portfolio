@@ -15,21 +15,13 @@ class TestOpenaiClient:
             yield mock_instance
 
     @pytest.fixture
-    def mock_prompts(self):
-        """Mock prompts loading."""
-        with patch(
-            "ai.clients.openai_client.load_yaml",
-            return_value={
-                "chatbot_system_prompt": "You are a helpful assistant.",
-                "chatbot_summary_prompt": "Summarize the conversation:",
-            },
-        ):
-            yield
-
-    @pytest.fixture
-    def openai_client(self, mock_openai, mock_prompts):
+    def openai_client(self, mock_openai):
         """Create an OpenaiClient instance for testing."""
-        return OpenaiClient(openai_api_key="test-key")
+        return OpenaiClient(
+            openai_api_key="test-key",
+            system_prompt="You are a helpful assistant.",
+            summary_prompt="Summarize the conversation:",
+        )
 
     def test_initialization(self, openai_client):
         """Test OpenaiClient initialization."""
@@ -48,7 +40,7 @@ class TestOpenaiClient:
         ],
     )
     def test_initialization_with_parameters(
-        self, mock_openai, mock_prompts, model, temperature, max_messages
+        self, mock_openai, model, temperature, max_messages
     ):
         """Test OpenaiClient initialization with custom parameters."""
         client = OpenaiClient(
@@ -56,6 +48,8 @@ class TestOpenaiClient:
             model=model,
             temperature=temperature,
             max_messages=max_messages,
+            system_prompt="You are a helpful assistant.",
+            summary_prompt="Summarize the conversation:",
         )
 
         assert client.model == model

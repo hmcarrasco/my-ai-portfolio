@@ -1,18 +1,13 @@
 import threading
 from typing import Optional
+
 from fastapi import HTTPException
 
+from ai.clients.chunker import TextChunker
 from ai.clients.openai_client import OpenaiClient
 from ai.clients.rag_service import RAGService
-from ai.clients.chunker import TextChunker
-from ai.config.settings import (
-    OPENAI_API_KEY,
-    CHROMA_COLLECTION,
-    CHROMA_PERSIST_PATH,
-    DATA_PATH,
-    CHUNK_SIZE,
-    CHUNK_OVERLAP,
-)
+from ai.config.settings import settings
+from ai.utils.loaders import load_yaml
 from ai.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -75,14 +70,26 @@ class RAGManager:
             if self._rag_service is not None:
                 return
 
+            # Load chatbot prompts
+            prompts = load_yaml(settings.chatbot_prompts_path)
+            system_prompt = prompts.get("chatbot_system_prompt", "")
+            summary_prompt = prompts.get("chatbot_summary_prompt", "")
+
             logger.info("Initializing OpenAI client...")
-            openai_client = OpenaiClient(openai_api_key=OPENAI_API_KEY)
+            openai_client = OpenaiClient(
+                openai_api_key=settings.openai_api_key,
+                model=settings.openai_model,
+                system_prompt=system_prompt,
+                summary_prompt=summary_prompt,
+            )
 
             logger.info("Initializing RAG service...")
             self._rag_service = RAGService(
                 openai_client=openai_client,
-                chroma_collection=CHROMA_COLLECTION,
-                persist_path=CHROMA_PERSIST_PATH,
+                openai_api_key=settings.openai_api_key,
+                chroma_collection=settings.chroma_collection,
+                persist_path=settings.chroma_persist_path,
+                embedding_model=settings.openai_embedding_model,
             )
 
             # Ingest data if collection is empty
@@ -96,11 +103,16 @@ class RAGManager:
         """
         Private method to ingest data from file into ChromaDB.
         """
-        logger.info("ChromaDB collection empty, ingesting data from %s", DATA_PATH)
+        logger.info(
+            "ChromaDB collection empty, ingesting data from %s", settings.data_path
+        )
 
         try:
-            chunker = TextChunker(chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP)
-            chunks = chunker.chunk_file(DATA_PATH)
+            chunker = TextChunker(
+                chunk_size=settings.chunk_size,
+                overlap=settings.chunk_overlap,
+            )
+            chunks = chunker.chunk_file(settings.data_path)
 
             for idx, chunk in enumerate(chunks):
                 doc_id = f"doc_{idx}"
@@ -108,9 +120,9 @@ class RAGManager:
 
             logger.info("Data ingestion complete: %d chunks added.", len(chunks))
         except FileNotFoundError:
-            logger.error("Data file not found: %s", DATA_PATH)
+            logger.error("Data file not found: %s", settings.data_path)
             raise HTTPException(
-                status_code=500, detail=f"Data file not found: {DATA_PATH}"
+                status_code=500, detail=f"Data file not found: {settings.data_path}"
             )
         except Exception as e:
             logger.error("Error during data ingestion: %s", e, exc_info=True)

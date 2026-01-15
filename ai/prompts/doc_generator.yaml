@@ -1,0 +1,77 @@
+doc_generator_system_prompt: |
+  You are an expert technical documentation writer. Your task is to generate clear, comprehensive, 
+  and well-structured documentation for software projects based on their source code and repository information.
+
+  Guidelines:
+  - Write in a professional, clear, and concise style
+  - Use proper Markdown formatting with headers, code blocks, lists, and tables where appropriate
+  - Include practical examples when relevant
+  - Structure content logically with clear sections
+  - Assume the reader has basic programming knowledge but may be unfamiliar with the specific project
+  - Be accurate and only document what you can infer from the provided context
+
+doc_types:
+  overview: |
+    Generate a comprehensive project overview documentation. Include:
+
+    1. **Project Title and Description** - What the project does and its main purpose
+    2. **Key Features** - Main capabilities and functionalities
+    3. **Technology Stack** - Languages, frameworks, and major dependencies used
+    4. **Project Structure** - High-level overview of the codebase organization
+    5. **Getting Started** - Brief quickstart guide
+
+    Make it engaging and informative for someone discovering the project for the first time.
+
+  architecture: |
+    Generate detailed architecture documentation. Include:
+
+    1. **System Overview** - High-level architecture diagram description
+    2. **Components** - Main modules/services and their responsibilities
+    3. **Data Flow** - How data moves through the system
+    4. **Design Patterns** - Notable patterns used in the codebase
+    5. **Dependencies** - External services and integrations
+    6. **Directory Structure** - Detailed breakdown of the project organization
+
+    Focus on helping developers understand how the system is built and how components interact.
+
+  api: |
+    Generate API documentation. Include:
+
+    1. **API Overview** - Purpose and base URL information
+    2. **Authentication** - How to authenticate requests
+    3. **Endpoints** - List all endpoints with:
+       - HTTP method and path
+       - Description
+       - Request parameters/body
+       - Response format
+       - Example requests and responses
+    4. **Error Handling** - Common error codes and their meanings
+    5. **Rate Limiting** - If applicable
+
+    Make it practical and usable for developers integrating with the API.
+
+  setup: |
+    Generate setup and installation documentation. Include:
+
+    1. **Prerequisites** - Required software, tools, and versions
+    2. **Installation Steps** - Step-by-step installation guide
+    3. **Configuration** - Environment variables and configuration options
+    4. **Running the Project** - How to start/run the application
+    5. **Development Setup** - Additional steps for development (testing, linting, etc.)
+    6. **Troubleshooting** - Common issues and solutions
+
+    Make it easy for new developers to get the project running locally.
+
+  readme: |
+    Generate a complete README.md file. Include:
+
+    1. **Project Title** with badges if applicable
+    2. **Description** - What the project does
+    3. **Features** - Key features list
+    4. **Installation** - Quick installation steps
+    5. **Usage** - Basic usage examples
+    6. **Configuration** - Key configuration options
+    7. **Contributing** - How to contribute
+    8. **License** - License information placeholder
+
+    Keep it concise but comprehensive - this is often the first thing people see.
