@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from ai.api.main import limiter
+from ai.api.rate_limiter import limiter
 from ai.api.schemas.docs import (
     GenerateDocsRequest,
     GenerateDocsResponse,
