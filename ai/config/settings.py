@@ -12,13 +12,13 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 # CORS Configuration
 ALLOWED_ORIGINS: List[str] = os.getenv(
-    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000"
+    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,http://localhost:5173"
 ).split(",")
 
 # RAG Configuration
 DATA_PATH = "ai/data/my-data.txt"
 CHROMA_COLLECTION = "rag_docs"
-CHROMA_PERSIST_PATH = "./chroma_db"
+CHROMA_PERSIST_PATH = "./ai/chroma_db"
 
 # Indexing parameters
 CHUNK_SIZE = 256

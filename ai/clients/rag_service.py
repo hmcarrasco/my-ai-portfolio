@@ -15,7 +15,7 @@ class RAGService:
         openai_client: OpenaiClient,
         openai_api_key: str,
         chroma_collection: str = "docs",
-        persist_path: str = "./chroma_db",
+        persist_path: str = "./ai/chroma_db",
         embedding_model: str = "text-embedding-3-small",
     ):
         self.chroma = PersistentClient(path=persist_path)
