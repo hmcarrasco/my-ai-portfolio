@@ -334,9 +334,7 @@ class DocGenerator:
                         full_repo,
                         latest_sha,
                     )
-                    return {
-                        dt: cached_docs[dt] for dt in doc_types
-                    }, True
+                    return {dt: cached_docs[dt] for dt in doc_types}, True
 
         context = self.fetch_repo_context(full_repo)
 

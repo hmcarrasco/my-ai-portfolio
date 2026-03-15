@@ -35,9 +35,7 @@ class TestOpenaiClient:
             ("gpt-4.1-mini", 0.7),
         ],
     )
-    def test_initialization_with_parameters(
-        self, mock_openai, model, temperature
-    ):
+    def test_initialization_with_parameters(self, mock_openai, model, temperature):
         """Test OpenaiClient initialization with custom parameters."""
         client = OpenaiClient(
             openai_api_key="test-key",
@@ -49,9 +47,7 @@ class TestOpenaiClient:
         assert client.model == model
         assert client.temperature == temperature
 
-    def test_get_response_includes_system_prompt(
-        self, openai_client, mock_openai
-    ):
+    def test_get_response_includes_system_prompt(self, openai_client, mock_openai):
         """Test that get_response includes system prompt."""
         mock_response = MagicMock()
         mock_response.choices[0].message.content = "Hello! How can I help?"

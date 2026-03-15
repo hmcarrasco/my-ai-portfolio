@@ -54,7 +54,7 @@ export default function DocsPage() {
       .then((data) => setProjects(data.projects))
       .catch(() => setError('Failed to load projects.'))
       .finally(() => setIsLoadingProjects(false));
-  }, []);
+  }, [projects.length, setProjects]);
 
   const handleGenerate = async (repo: string, forceRegenerate: boolean = false) => {
     setSelectedRepo(repo);

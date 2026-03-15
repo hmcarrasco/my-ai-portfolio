@@ -19,9 +19,7 @@ def get_chat_service() -> ChatService:
     return ChatService.get_instance()
 
 
-@router.post(
-    "/ask", response_model=AnswerResponse
-)
+@router.post("/ask", response_model=AnswerResponse)
 @limiter.limit("5/minute")
 def ask_question(
     request: Request,

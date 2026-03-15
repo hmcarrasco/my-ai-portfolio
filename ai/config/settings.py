@@ -10,9 +10,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 # CORS Configuration
-ALLOWED_ORIGINS: List[str] = os.getenv(
-    "ALLOWED_ORIGINS"
-).split(",")
+ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS").split(",")
 
 # RAG Configuration
 DATA_PATH = os.getenv("DATA_PATH", "ai/data/my-data.txt")
@@ -69,7 +67,6 @@ class Settings:
         # API Keys
         self.openai_api_key: str = OPENAI_API_KEY
         self.github_token: str | None = GITHUB_TOKEN
-
 
         # OpenAI
         self.openai_model: str = OPENAI_MODEL

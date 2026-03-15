@@ -142,8 +142,8 @@ class TestDocGenerator:
         with patch("ai.clients.doc_generator.os.path.exists", return_value=True):
             with patch(
                 "builtins.open",
-                new_callable=lambda: lambda *a, **k: __import__('io').StringIO(
-                    __import__('json').dumps(cached_data)
+                new_callable=lambda: lambda *a, **k: __import__("io").StringIO(
+                    __import__("json").dumps(cached_data)
                 ),
             ):
                 docs, cached = doc_generator.generate_all_documentation(
