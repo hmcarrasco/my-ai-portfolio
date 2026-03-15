@@ -7,7 +7,6 @@ from ai.api.schemas.docs import (
     DocTypesResponse,
     ProjectsResponse,
 )
-from ai.api.security import verify_api_key
 from ai.clients.doc_generator import DocGenerator, VALID_DOC_TYPES
 from ai.config.settings import settings
 from ai.utils.loaders import load_yaml
@@ -41,7 +40,6 @@ def get_projects() -> list[dict]:
 @router.get(
     "/projects",
     response_model=ProjectsResponse,
-    dependencies=[Depends(verify_api_key)],
     summary="List available projects",
 )
 def list_projects() -> ProjectsResponse:
@@ -58,7 +56,6 @@ def list_projects() -> ProjectsResponse:
 @router.get(
     "/types",
     response_model=DocTypesResponse,
-    dependencies=[Depends(verify_api_key)],
     summary="List available documentation types",
 )
 def list_doc_types() -> DocTypesResponse:
@@ -74,7 +71,6 @@ def list_doc_types() -> DocTypesResponse:
 @router.post(
     "/generate",
     response_model=GenerateDocsResponse,
-    dependencies=[Depends(verify_api_key)],
     summary="Generate documentation for a repository",
 )
 @limiter.limit("3/day")
@@ -110,13 +106,15 @@ def generate_documentation(
     logger.info("Generating documentation for repo: %s, types: %s", req.repo, doc_types)
 
     try:
-        documentation = doc_generator.generate_all_documentation(
+        documentation, cached = doc_generator.generate_all_documentation(
             repo=req.repo,
             doc_types=doc_types,
+            force_regenerate=req.force_regenerate,
         )
 
         logger.info(
-            "Successfully generated %d documentation types for %s",
+            "Successfully %s %d documentation types for %s",
+            "served cached" if cached else "generated",
             len(documentation),
             req.repo,
         )
@@ -124,6 +122,7 @@ def generate_documentation(
         return GenerateDocsResponse(
             repo=req.repo,
             documentation=documentation,
+            cached=cached,
         )
 
     except ValueError as e:

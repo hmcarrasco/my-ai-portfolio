@@ -6,17 +6,16 @@ from dotenv import load_dotenv
 load_dotenv("ai/config/.env") or load_dotenv()
 
 # API Configuration
-CHATBOT_API_KEY = os.getenv("CHATBOT_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 # CORS Configuration
 ALLOWED_ORIGINS: List[str] = os.getenv(
-    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,http://localhost:5173"
+    "ALLOWED_ORIGINS"
 ).split(",")
 
 # RAG Configuration
-DATA_PATH = "ai/data/my-data.txt"
+DATA_PATH = os.getenv("DATA_PATH", "ai/data/my-data.txt")
 CHROMA_COLLECTION = "rag_docs"
 CHROMA_PERSIST_PATH = "./ai/chroma_db"
 
@@ -26,7 +25,7 @@ CHUNK_OVERLAP = 20
 
 # GitHub API Configuration
 GITHUB_API_BASE_URL = "https://api.github.com"
-GITHUB_OWNER = os.getenv("GITHUB_OWNER", "hmcarrasco")
+GITHUB_OWNER = os.getenv("GITHUB_OWNER")
 
 # Documentation Generator Configuration
 SOURCE_CODE_EXTENSIONS = {
@@ -55,6 +54,9 @@ CHATBOT_PROMPTS_PATH = "ai/prompts/chatbot_prompts.yaml"
 DOC_GENERATOR_PROMPTS_PATH = "ai/prompts/doc_generator.yaml"
 PROJECTS_PATH = "ai/config/projects.yaml"
 
+# Documentation Cache
+DOCS_CACHE_PATH = "ai/data/docs_cache"
+
 # Openai Models
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
@@ -66,8 +68,8 @@ class Settings:
     def __init__(self) -> None:
         # API Keys
         self.openai_api_key: str = OPENAI_API_KEY
-        self.chatbot_api_key: str = CHATBOT_API_KEY
         self.github_token: str | None = GITHUB_TOKEN
+
 
         # OpenAI
         self.openai_model: str = OPENAI_MODEL
@@ -94,6 +96,9 @@ class Settings:
         self.chatbot_prompts_path: str = CHATBOT_PROMPTS_PATH
         self.doc_generator_prompts_path: str = DOC_GENERATOR_PROMPTS_PATH
         self.projects_path: str = PROJECTS_PATH
+
+        # Cache
+        self.docs_cache_path: str = DOCS_CACHE_PATH
 
 
 settings = Settings()

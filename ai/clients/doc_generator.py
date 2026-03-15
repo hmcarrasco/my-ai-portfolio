@@ -1,3 +1,5 @@
+import json
+import os
 from typing import Any
 
 from ai.clients.github_client import GitHubClient
@@ -254,19 +256,59 @@ class DocGenerator:
         """
         return f"{settings.github_owner}/{repo}"
 
+    def _get_cache_path(self, repo: str) -> str:
+        """Get the cache file path for a repository."""
+        safe_name = repo.replace("/", "_").replace("\\", "_")
+        return os.path.join(settings.docs_cache_path, f"{safe_name}.json")
+
+    def _load_cache(self, repo: str) -> dict[str, Any] | None:
+        """
+        Load cached documentation for a repository.
+
+        Returns:
+            Cache data dict with 'commit_sha' and 'documentation', or None.
+        """
+        cache_path = self._get_cache_path(repo)
+        if not os.path.exists(cache_path):
+            return None
+        try:
+            with open(cache_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning("Failed to load cache for %s: %s", repo, e)
+            return None
+
+    def _save_cache(
+        self, repo: str, commit_sha: str, documentation: dict[str, str]
+    ) -> None:
+        """Save generated documentation to cache."""
+        cache_path = self._get_cache_path(repo)
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        try:
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(
+                    {"commit_sha": commit_sha, "documentation": documentation},
+                    f,
+                    ensure_ascii=False,
+                )
+            logger.info("Saved documentation cache for %s (sha: %s)", repo, commit_sha)
+        except OSError as e:
+            logger.warning("Failed to save cache for %s: %s", repo, e)
+
     def generate_all_documentation(
-        self, repo: str, doc_types: list[str]
-    ) -> dict[str, str]:
+        self, repo: str, doc_types: list[str], force_regenerate: bool = False
+    ) -> tuple[dict[str, str], bool]:
         """
         Generate all documentation types for a repository.
-        Fetches context once and generates each doc type.
+        Uses cache when the latest commit hasn't changed.
 
         Args:
             repo: Repository name (e.g., 'my-ai-portfolio').
             doc_types: List of documentation types to generate.
+            force_regenerate: If True, bypass cache.
 
         Returns:
-            Dictionary mapping doc_type to generated documentation.
+            Tuple of (documentation dict, cached bool).
 
         Raises:
             ValueError: If any doc_type is not valid.
@@ -279,6 +321,22 @@ class DocGenerator:
 
         full_repo = self._get_full_repo(repo)
         logger.info("Generating documentation for %s, types: %s", full_repo, doc_types)
+
+        # Check cache
+        latest_sha = self.github_client.get_latest_commit_sha(full_repo)
+        if not force_regenerate and latest_sha:
+            cache = self._load_cache(repo)
+            if cache and cache.get("commit_sha") == latest_sha:
+                cached_docs = cache.get("documentation", {})
+                if all(dt in cached_docs for dt in doc_types):
+                    logger.info(
+                        "Serving cached documentation for %s (sha: %s)",
+                        full_repo,
+                        latest_sha,
+                    )
+                    return {
+                        dt: cached_docs[dt] for dt in doc_types
+                    }, True
 
         context = self.fetch_repo_context(full_repo)
 
@@ -304,7 +362,11 @@ class DocGenerator:
                 )
                 documentation[doc_type] = f"[Error generating {doc_type} documentation]"
 
-        return documentation
+        # Save to cache
+        if latest_sha:
+            self._save_cache(repo, latest_sha, documentation)
+
+        return documentation, False
 
     def generate_documentation(self, repo: str, doc_type: str) -> str:
         """
@@ -321,7 +383,7 @@ class DocGenerator:
         Raises:
             ValueError: If doc_type is not valid.
         """
-        result = self.generate_all_documentation(repo, [doc_type])
+        result, _ = self.generate_all_documentation(repo, [doc_type])
         return result[doc_type]
 
     def _build_prompt(self, context: dict[str, Any], doc_type_prompt: str) -> str:

@@ -148,3 +148,23 @@ class GitHubClient:
         except requests.exceptions.RequestException as e:
             logger.error("Request error fetching languages for %s: %s", repo, e)
             raise
+
+    def get_latest_commit_sha(self, repo: str, branch: str = "main") -> str | None:
+        """
+        Get the latest commit SHA from the default branch.
+
+        Args:
+            repo: Repository in format 'owner/repo'.
+            branch: Branch name (default: 'main').
+
+        Returns:
+            Latest commit SHA string, or None on failure.
+        """
+        url = f"{self.base_url}/repos/{repo}/commits/{branch}"
+        try:
+            response = requests.get(url, headers=self.headers, timeout=10)
+            response.raise_for_status()
+            return response.json().get("sha")
+        except requests.exceptions.RequestException as e:
+            logger.warning("Could not fetch latest commit for %s: %s", repo, e)
+            return None

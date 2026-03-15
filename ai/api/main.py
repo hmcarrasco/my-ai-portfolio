@@ -22,10 +22,6 @@ async def lifespan(app: FastAPI):
         logger.error("OPENAI_API_KEY is not configured")
         raise RuntimeError("OPENAI_API_KEY environment variable is required")
 
-    if not settings.chatbot_api_key:
-        logger.error("CHATBOT_API_KEY is not configured")
-        raise RuntimeError("CHATBOT_API_KEY environment variable is required")
-
     RAGManager.initialize()
     logger.info("RAG manager initialized and data loaded")
     yield
@@ -49,7 +45,7 @@ def create_app() -> FastAPI:
         allow_origins=settings.allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS", "DELETE"],
-        allow_headers=["Content-Type", "X-API-Key"],
+        allow_headers=["Content-Type"],
     )
 
     app.include_router(health_router)

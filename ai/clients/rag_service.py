@@ -81,4 +81,4 @@ class RAGService:
         context = "\n".join(docs)
         prompt = f"Context:\n{context}\n\nQuestion: {user_query}\nAnswer:"
         logger.info("Sending RAG prompt to OpenAI.")
-        return self.openai_client.generate_response_with_memory(prompt)
+        return self.openai_client.get_response(prompt)

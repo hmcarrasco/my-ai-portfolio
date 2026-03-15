@@ -10,7 +10,6 @@ def mock_env_vars():
         os.environ,
         {
             "OPENAI_API_KEY": "test-openai-key",
-            "CHATBOT_API_KEY": "test-chatbot-key",
             "ALLOWED_ORIGINS": "http://localhost:3000",
         },
     ):

@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from ai.api.rate_limiter import limiter
 from ai.api.schemas.chat import QuestionRequest, AnswerResponse
-from ai.api.security import verify_api_key
 from ai.core.chat_service import ChatService
 from ai.utils.logger import get_logger
 
@@ -21,7 +20,7 @@ def get_chat_service() -> ChatService:
 
 
 @router.post(
-    "/ask", response_model=AnswerResponse, dependencies=[Depends(verify_api_key)]
+    "/ask", response_model=AnswerResponse
 )
 @limiter.limit("5/minute")
 def ask_question(
