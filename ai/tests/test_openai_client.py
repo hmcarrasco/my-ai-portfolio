@@ -25,7 +25,7 @@ class TestOpenaiClient:
     def test_initialization(self, openai_client):
         """Test OpenaiClient initialization."""
         assert openai_client.model == "gpt-4.1-mini"
-        assert openai_client.temperature == 0.2
+        assert openai_client.temperature == 0.0
 
     @pytest.mark.parametrize(
         "model,temperature",
