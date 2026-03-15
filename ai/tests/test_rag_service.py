@@ -22,7 +22,7 @@ def mock_chroma_client(mock_chroma_collection):
 @pytest.fixture
 def mock_openai_client():
     client = MagicMock()
-    client.generate_response_with_memory.return_value = "mock-answer"
+    client.get_response.return_value = "mock-answer"
     return client
 
 
@@ -116,7 +116,7 @@ def test_answer_with_rag_builds_prompt_and_calls_openai(
         out = service.answer_with_rag("my question")
 
     assert out == "mock-answer"
-    called_prompt = mock_openai_client.generate_response_with_memory.call_args[0][0]
+    called_prompt = mock_openai_client.get_response.call_args[0][0]
     assert "Context:" in called_prompt
     assert "ctx1" in called_prompt
     assert "ctx2" in called_prompt

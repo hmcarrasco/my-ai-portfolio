@@ -1,11 +1,9 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
+from ai.api.rate_limiter import limiter, rate_limit_exceeded_handler
 from ai.config.settings import settings
 from ai.api.routers.chat import router as chat_router
 from ai.api.routers.docs import router as docs_router
@@ -16,20 +14,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 logger = get_logger(__name__)
 
-# Rate limiter instance - uses IP address as identifier
-limiter = Limiter(key_func=get_remote_address)
-
-
-def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
-    """Custom handler for rate limit exceeded errors."""
-    logger.warning(
-        "Rate limit exceeded for %s on %s", request.client.host, request.url.path
-    )
-    return JSONResponse(
-        status_code=429,
-        content={"detail": f"Rate limit exceeded: {exc.detail}"},
-    )
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,10 +21,6 @@ async def lifespan(app: FastAPI):
     if not settings.openai_api_key:
         logger.error("OPENAI_API_KEY is not configured")
         raise RuntimeError("OPENAI_API_KEY environment variable is required")
-
-    if not settings.chatbot_api_key:
-        logger.error("CHATBOT_API_KEY is not configured")
-        raise RuntimeError("CHATBOT_API_KEY environment variable is required")
 
     RAGManager.initialize()
     logger.info("RAG manager initialized and data loaded")
@@ -65,7 +45,7 @@ def create_app() -> FastAPI:
         allow_origins=settings.allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS", "DELETE"],
-        allow_headers=["Content-Type", "X-API-Key"],
+        allow_headers=["Content-Type"],
     )
 
     app.include_router(health_router)

@@ -12,6 +12,10 @@ class GenerateDocsRequest(BaseModel):
         description="Repository name (e.g., 'my-ai-portfolio')",
         examples=["my-ai-portfolio"],
     )
+    force_regenerate: bool = Field(
+        False,
+        description="If true, bypass cache and regenerate documentation",
+    )
 
 
 class GenerateDocsResponse(BaseModel):
@@ -21,6 +25,10 @@ class GenerateDocsResponse(BaseModel):
     documentation: dict[str, str] = Field(
         ...,
         description="Generated documentation by type (e.g., {'overview': '...', 'api': '...'})",
+    )
+    cached: bool = Field(
+        False,
+        description="Whether the documentation was served from cache",
     )
 
 

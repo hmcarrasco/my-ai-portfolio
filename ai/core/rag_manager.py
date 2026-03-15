@@ -73,14 +73,12 @@ class RAGManager:
             # Load chatbot prompts
             prompts = load_yaml(settings.chatbot_prompts_path)
             system_prompt = prompts.get("chatbot_system_prompt", "")
-            summary_prompt = prompts.get("chatbot_summary_prompt", "")
 
             logger.info("Initializing OpenAI client...")
             openai_client = OpenaiClient(
                 openai_api_key=settings.openai_api_key,
                 model=settings.openai_model,
                 system_prompt=system_prompt,
-                summary_prompt=summary_prompt,
             )
 
             logger.info("Initializing RAG service...")

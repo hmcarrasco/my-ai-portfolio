@@ -15,7 +15,7 @@ class RAGService:
         openai_client: OpenaiClient,
         openai_api_key: str,
         chroma_collection: str = "docs",
-        persist_path: str = "./chroma_db",
+        persist_path: str = "./ai/chroma_db",
         embedding_model: str = "text-embedding-3-small",
     ):
         self.chroma = PersistentClient(path=persist_path)
@@ -81,4 +81,4 @@ class RAGService:
         context = "\n".join(docs)
         prompt = f"Context:\n{context}\n\nQuestion: {user_query}\nAnswer:"
         logger.info("Sending RAG prompt to OpenAI.")
-        return self.openai_client.generate_response_with_memory(prompt)
+        return self.openai_client.get_response(prompt)

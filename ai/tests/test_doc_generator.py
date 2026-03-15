@@ -20,6 +20,7 @@ class TestDocGenerator:
         ]
         client.get_languages.return_value = {"Python": 10000, "JavaScript": 5000}
         client.get_file_content.return_value = "print('hello world')"
+        client.get_latest_commit_sha.return_value = "abc123"
         return client
 
     @pytest.fixture
@@ -92,7 +93,8 @@ class TestDocGenerator:
         self, doc_generator, mock_openai_client, doc_type
     ):
         """Test generating documentation for all valid types."""
-        result = doc_generator.generate_documentation("owner/repo", doc_type)
+        with patch("ai.clients.doc_generator.os.path.exists", return_value=False):
+            result = doc_generator.generate_documentation("owner/repo", doc_type)
 
         assert result == "# Generated Documentation\n\nThis is the generated docs."
         mock_openai_client.get_response.assert_called_once()
@@ -111,10 +113,56 @@ class TestDocGenerator:
         """Test that OpenAI errors are handled gracefully."""
         mock_openai_client.get_response.side_effect = Exception("OpenAI API Error")
 
-        result = doc_generator.generate_documentation("owner/repo", "overview")
+        with patch("ai.clients.doc_generator.os.path.exists", return_value=False):
+            result = doc_generator.generate_documentation("owner/repo", "overview")
 
         # Errors are caught and returned as error message
         assert "[Error generating overview documentation]" in result
+
+    def test_generate_all_returns_cached_false_on_fresh(
+        self, doc_generator, mock_openai_client
+    ):
+        """Test that generate_all_documentation returns cached=False on fresh generation."""
+        with patch("ai.clients.doc_generator.os.path.exists", return_value=False):
+            docs, cached = doc_generator.generate_all_documentation(
+                "owner/repo", ["overview"]
+            )
+        assert cached is False
+        assert "overview" in docs
+        mock_openai_client.get_response.assert_called_once()
+
+    def test_generate_all_serves_from_cache(
+        self, doc_generator, mock_github_client, mock_openai_client
+    ):
+        """Test that cached docs are returned when commit SHA matches."""
+        cached_data = {
+            "commit_sha": "abc123",
+            "documentation": {"overview": "# Cached Overview"},
+        }
+        with patch("ai.clients.doc_generator.os.path.exists", return_value=True):
+            with patch(
+                "builtins.open",
+                new_callable=lambda: lambda *a, **k: __import__("io").StringIO(
+                    __import__("json").dumps(cached_data)
+                ),
+            ):
+                docs, cached = doc_generator.generate_all_documentation(
+                    "owner/repo", ["overview"]
+                )
+        assert cached is True
+        assert docs["overview"] == "# Cached Overview"
+        mock_openai_client.get_response.assert_not_called()
+
+    def test_generate_all_force_regenerate_skips_cache(
+        self, doc_generator, mock_openai_client
+    ):
+        """Test that force_regenerate bypasses cache."""
+        with patch("ai.clients.doc_generator.os.path.exists", return_value=False):
+            docs, cached = doc_generator.generate_all_documentation(
+                "owner/repo", ["overview"], force_regenerate=True
+            )
+        assert cached is False
+        mock_openai_client.get_response.assert_called_once()
 
     def test_format_structure(self, doc_generator):
         """Test structure formatting."""
