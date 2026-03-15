@@ -10,7 +10,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 # CORS Configuration
-ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS").split(",")
+ALLOWED_ORIGINS: List[str] = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:8000"
+).split(",")
 
 # RAG Configuration
 DATA_PATH = os.getenv("DATA_PATH", "ai/data/my-data.txt")
