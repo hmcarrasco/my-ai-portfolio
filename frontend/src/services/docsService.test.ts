@@ -21,7 +21,10 @@ describe('docsService', () => {
 
       const result = await fetchProjects();
 
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/docs/projects'));
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/docs/projects'),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
       expect(result).toEqual(mockData);
     });
 
