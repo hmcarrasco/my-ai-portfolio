@@ -1,0 +1,45 @@
+services:
+  # ─── Backend API (FastAPI) ───
+  - type: web
+    name: my-ai-portfolio-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r ai/requirements.txt
+    startCommand: uvicorn ai.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GITHUB_OWNER
+        value: hmcarrasco
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: DATA_PATH
+        value: /etc/secrets/my-data.txt
+
+  # ─── Frontend (Vite Static Site) ───
+  - type: web
+    name: my-ai-portfolio
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

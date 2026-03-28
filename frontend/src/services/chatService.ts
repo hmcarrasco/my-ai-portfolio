@@ -10,6 +10,7 @@ export async function sendMessage(question: string): Promise<ChatResponse> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30000),
   });
 
   if (!res.ok) {

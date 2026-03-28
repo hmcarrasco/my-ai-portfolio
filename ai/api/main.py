@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from contextlib import asynccontextmanager
 
 from slowapi.errors import RateLimitExceeded
@@ -47,6 +47,14 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "OPTIONS", "DELETE"],
         allow_headers=["Content-Type"],
     )
+
+    @app.middleware("http")
+    async def add_security_headers(request: Request, call_next) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
 
     app.include_router(health_router)
     app.include_router(chat_router)

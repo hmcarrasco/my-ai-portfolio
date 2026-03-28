@@ -48,5 +48,5 @@ def ask_question(
         logger.error("Error generating answer: %s", e, exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate answer: {type(e).__name__}.",
+            detail="Failed to generate answer. Please try again later.",
         )
