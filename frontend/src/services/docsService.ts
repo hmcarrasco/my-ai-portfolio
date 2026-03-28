@@ -22,7 +22,7 @@ export async function generateDocs(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ repo, force_regenerate: forceRegenerate }),
-    signal: AbortSignal.timeout(120000),
+    signal: AbortSignal.timeout(200000),
   });
 
   if (!res.ok) {
