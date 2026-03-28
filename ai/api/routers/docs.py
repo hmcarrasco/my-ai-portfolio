@@ -135,5 +135,5 @@ def generate_documentation(
         )
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate documentation: {type(e).__name__}",
+            detail="Failed to generate documentation. Please try again later.",
         )
